@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Query
 from sqlalchemy.orm import Session
 from typing import List
 import config.db
@@ -15,65 +15,58 @@ def get_db():
     finally:
         db.close()
 
-# Endpoints protegidos (requieren token)
 @producto_router.get("/", response_model=List[schema_productos.Producto])
-async def read_productos(
-    skip: int = 0, 
-    limit: int = 100, 
+async def get_productos(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user)
 ):
-    '''Obtener todos los productos'''
-    productos = crud_productos.get_productos(db=db, skip=skip, limit=limit)
-    return productos
+    '''Obtiene todos los productos'''
+    return crud_productos.get_productos(db, skip, limit)
+
+@producto_router.get("/bajo-stock/", response_model=List[schema_productos.Producto])
+async def get_productos_bajo_stock(
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    '''Obtiene productos con stock por debajo del mínimo'''
+    return crud_productos.get_productos_bajo_stock(db)
 
 @producto_router.get("/{producto_id}", response_model=schema_productos.Producto)
-async def read_producto(
-    producto_id: int, 
+async def get_producto(
+    producto_id: int,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user)
 ):
-    '''Obtener un producto por ID'''
-    db_producto = crud_productos.get_producto(db=db, producto_id=producto_id)
-    if db_producto is None:
+    '''Obtiene un producto por ID'''
+    db_producto = crud_productos.get_producto(db, producto_id)
+    if not db_producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     return db_producto
 
 @producto_router.post("/", response_model=schema_productos.Producto, status_code=status.HTTP_201_CREATED)
 async def create_producto(
-    producto: schema_productos.ProductoCreate, 
+    producto: schema_productos.ProductoCreate,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user)
 ):
-    '''Crear un nuevo producto'''
-    # Verificar si ya existe un producto con el mismo nombre
-    db_producto = crud_productos.get_producto_by_nombre(db, nombre=producto.nombre)
-    if db_producto:
-        raise HTTPException(status_code=400, detail="Producto con ese nombre ya existe")
+    '''Crea un nuevo producto'''
+    existe = crud_productos.get_producto_by_nombre(db, producto.nombre)
+    if existe:
+        raise HTTPException(status_code=400, detail="Ya existe un producto con ese nombre")
     
-    return crud_productos.create_producto(db=db, producto=producto)
+    return crud_productos.create_producto(db, producto)
 
 @producto_router.put("/{producto_id}", response_model=schema_productos.Producto)
 async def update_producto(
-    producto_id: int, 
-    producto: schema_productos.ProductoUpdate, 
+    producto_id: int,
+    producto: schema_productos.ProductoUpdate,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user)
 ):
-    '''Actualizar un producto existente'''
-    db_producto = crud_productos.update_producto(db=db, producto_id=producto_id, producto=producto)
-    if db_producto is None:
+    '''Actualiza un producto existente'''
+    db_producto = crud_productos.update_producto(db, producto_id, producto)
+    if not db_producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     return db_producto
-
-@producto_router.delete("/{producto_id}")
-async def delete_producto(
-    producto_id: int, 
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
-):
-    '''Eliminar un producto por ID'''
-    db_producto = crud_productos.delete_producto(db=db, producto_id=producto_id)
-    if db_producto is None:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
-    return {"message": "Producto eliminado exitosamente"}

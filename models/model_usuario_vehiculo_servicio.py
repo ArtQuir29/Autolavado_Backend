@@ -23,6 +23,7 @@ class ServicioVehiculo(Base):
 
     fecha = Column(Date, nullable=False)
     hora = Column(Time, nullable=False)
+    descuento = Column(Integer, default=0)  # 👈 NUEVO CAMPO (porcentaje)
     estatus = Column(Enum(Solicitud), default=Solicitud.Programa)
     estado = Column(Boolean, default=True)
     fecha_registro = Column(DateTime, server_default=func.now())
@@ -33,3 +34,11 @@ class ServicioVehiculo(Base):
     lavador_rel = relationship("User", foreign_keys=[lavador_Id], back_populates="lavador")
     servicio = relationship("Servicio", back_populates="vehiculos_servicios")
     vehiculo = relationship("Vehiculo", back_populates="servicios")
+    
+    @property
+    def precio_final(self):
+        """Calcula el precio final después del descuento"""
+        if self.servicio:
+            descuento_aplicado = self.descuento or 0
+            return self.servicio.costo * (1 - descuento_aplicado / 100)
+        return 0

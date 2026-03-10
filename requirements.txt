@@ -1,30 +1,32 @@
-annotated-doc==0.0.4
-annotated-types==0.7.0
-anyio==4.12.1
-astroid==4.0.4
-click==8.3.1
-colorama==0.4.6
-dill==0.4.1
+# Framework
 fastapi==0.128.0
-greenlet==3.3.1
-h11==0.16.0
-idna==3.11
-isort==7.0.0
-mccabe==0.7.0
-platformdirs==4.5.1
-pydantic==2.12.5
-pydantic_core==2.41.5
-pylint==4.0.4
-SQLAlchemy==2.0.46
-starlette==0.50.0
-tomlkit==0.14.0
-typing-inspection==0.4.2
-typing_extensions==4.15.0
 uvicorn==0.40.0
 
-pydantic[email]==2.12.5
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.9
+# Base de datos
+SQLAlchemy==2.0.46
 pymysql==1.1.0
-python-dotenv==1.0.0
+
+# Validación y serialización
+pydantic==2.12.5
 email-validator==2.2.0
+
+# Seguridad y autenticación
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-multipart==0.0.9
+
+# Utilidades
+python-dotenv==1.0.0
+
+# Análisis de código (PYLINT - requerido por el profesor)
+pylint==4.0.4
+astroid==4.0.4        # Dependencia de pylint
+dill==0.4.1           # Dependencia de pylint
+isort==7.0.0          # Dependencia de pylint
+mccabe==0.7.0         # Dependencia de pylint
+tomlkit==0.14.0       # Dependencia de pylint
+typing-inspection==0.4.2  # Dependencia de pylint
+
+# Tipado
+typing_extensions==4.15.0

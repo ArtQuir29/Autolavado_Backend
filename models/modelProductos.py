@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from config.db import Base
@@ -10,12 +10,14 @@ class Producto(Base):
     Id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(100), nullable=False)
     descripcion = Column(String(200))
-    precio = Column(Float, nullable=False)
-    stock = Column(Integer, default=0)
     categoria = Column(String(50))
+    unidad_medida = Column(String(20), nullable=False, default="Pieza")
+    stock_actual = Column(Integer, default=0)
+    stock_minimo = Column(Integer, default=0)
+    precio_compra = Column(Float, nullable=False)
     estado = Column(Boolean, default=True)
     fecha_registro = Column(DateTime, server_default=func.now())
-    fecha_modificacion = Column(DateTime, onupdate=func.now())
+    fecha_actualizacion = Column(DateTime, onupdate=func.now())  # Cambiado a fecha_actualizacion
     
-    # Relaciones (si se usan en servicios)
-    # productos_servicios = relationship("ServicioProducto", back_populates="producto")
+    # Relación con movimientos
+    movimientos = relationship("MovimientoInventario", back_populates="producto")
