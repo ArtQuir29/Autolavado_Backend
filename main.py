@@ -7,6 +7,7 @@ from routes.routes_usuario_vehiculo_servicio import servicio_vehiculo_router
 from routes.routes_productos import producto_router
 from routes.routes_movimientos_inventario import movimiento_router  # 👈 NUEVO
 from routes.routes_reportes import reportes_router
+from fastapi.middleware.cors import CORSMiddleware
 
 # Importar los modelos
 from models.modelUser import User
@@ -28,7 +29,13 @@ app = FastAPI(
     description="API para gestión de autolavado con autenticación JWT",
     version="1.0.0"
 )
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # tu frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Incluir todos los routers
 app.include_router(usuario_router)
 app.include_router(rol_router)
